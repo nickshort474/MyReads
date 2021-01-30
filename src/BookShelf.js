@@ -19,7 +19,7 @@ export default class BookShelf extends Component{
    const data = this.props.data;
      
    let display = data.map((book)=>{
-      return <Book title={book.title} author={book.authors} book={book} key={book.id} image={book.imageLinks['smallThumbnail']} id={book.id} updateUI={this.update.bind(this)}/>
+      return <Book title={book.title} shelf={book.shelf} author={book.authors} book={book} key={book.id} image={book.imageLinks['smallThumbnail']} id={book.id} updateUI={this.update.bind(this)}/>
    })
    
   return(

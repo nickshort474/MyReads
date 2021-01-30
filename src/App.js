@@ -10,7 +10,7 @@ class BooksApp extends React.Component {
  
   state = {
    	booksArray:[],
-    books:[]
+    searchedBooks:[]
   }
 
   componentDidMount(){
@@ -18,73 +18,73 @@ class BooksApp extends React.Component {
     this.update = this.update.bind(this);
     this.search = this.search.bind(this);
 	this.addBook = this.addBook.bind(this);
+	this.clearSearch = this.clearSearch.bind(this);
     BooksAPI.getAll().then((books)=>{
-      
-        this.setState({
-        	booksArray:books
-        })
+      this.setState({
+        booksArray:books
+      })
     })
   }
   
   update(book,shelf){
-    
-    
-    
-	BooksAPI.update({id:book.id}, shelf).then((response)=>{
+    BooksAPI.update({id:book.id}, shelf).then((response)=>{
    	  if(shelf === 'none'){
-        
-         this.setState(prevState =>({
+        this.setState(prevState =>({
         	booksArray:prevState.booksArray.filter(currentBook => currentBook.id !== book.id) 
          }))
       }
       book.shelf = shelf	
       this.setState(prevState =>({
-        	booksArray:prevState.booksArray.filter(currentBook => currentBook.id !== book.id).concat([book]) 
+        booksArray:prevState.booksArray.filter(currentBook => currentBook.id !== book.id).concat([book]) 
       }))
-      
-  	})
+    })
   }
  
   search(query){
     if(query === ''){
-        console.log('empty query')
-     	this.setState({books:[]}) 
+      this.setState({searchedBooks:[]}) 
     }else{
-    	console.log('saerching');
-    	BooksAPI.search(query,5).then(all => {
-  	  		if(all === undefined || all['error'] === 'empty query' ){
-        		this.setState({
-          			books:[]
-        		})
-      		}else{
-              this.setState({
-                  books:all
-              })
-      		}
-        })
-     }
-    
-      
+      BooksAPI.search(query,5).then(response => {
+  	  	if(response === undefined || response['error'] === 'empty query' ){
+          this.setState({
+          	searchedBooks:[]
+          })
+      	}else{
+          response.forEach(foundBook =>{
+            let bookAlreadyOnShelf = this.state.booksArray.find(book => foundBook.id === book.id)
+                
+            if(bookAlreadyOnShelf){
+              foundBook.shelf = bookAlreadyOnShelf.shelf
+              response.concat(foundBook)	
+            }
+          })
+          this.setState({
+            searchedBooks:response
+          })
+        }
+      })
+    }
     this.setState({
-     	query:query.trim()
+      query:query.trim()
     })
   }
 
-	addBook(book,shelf){
-      console.log('adding book');
-	  BooksAPI.update({id:book.id}, shelf).then((response)=>{
-   	
-      book.shelf = shelf	
-      this.setState(prevState =>({
-        	booksArray:prevState.booksArray.concat([book]) 
-      }))
-      this.props.history.push('/'); 
-      
-  	})
-    }
+  clearSearch(){
+    this.setState({searchedBooks:[]})
+  }
+
+  addBook(book,shelf){
+    BooksAPI.update({id:book.id}, shelf).then((response)=>{
+   	book.shelf = shelf	
+    this.setState(prevState =>({
+      booksArray:prevState.booksArray.concat([book]),
+      searchedBooks:[]
+    }))
+    this.props.history.push('/'); 
+    })
+  }
 
   render() {
-    
     
     return (
       <div className="app">       
@@ -92,7 +92,7 @@ class BooksApp extends React.Component {
   		  <LibraryPage data={this.state.booksArray} update={this.update}/>
   		)} />
        <Route path='/SearchPage' render={()=>(
-    	  <SearchPage search={this.search} data={this.state.books} addBook={this.addBook}/>
+    	  <SearchPage search={this.search} data={this.state.searchedBooks} clearSearch={this.clearSearch} addBook={this.addBook}/>
     	)} />
     	
       </div>

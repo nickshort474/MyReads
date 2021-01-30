@@ -1,8 +1,5 @@
 import React,{Component} from 'react';
-//import {Link} from 'react-router-dom';
 import PropTypes from 'prop-types';
-//import * as BooksAPI from './BooksAPI';
-
 
 export default class Book extends Component{
  
@@ -12,12 +9,11 @@ export default class Book extends Component{
   }
   
  constructor(props){
-  super(props);
+   super(props);
    
-    this.state = {
-  		value:'none'
+   this.state = {
+     value:this.props.shelf ? this.props.shelf : 'none'
    }
-  
  }
   
  handleChange(e){
@@ -30,11 +26,11 @@ export default class Book extends Component{
  }
 
  render(){
-   
+    
    let authors = [];
    if(this.props.author !== undefined){
      authors = this.props.author.map((author)=>{
-         return <div className="book-authors" key={author}>{author}<br /></div>
+       return <div className="book-authors" key={author}>{author}<br /></div>
     })
    }
   
